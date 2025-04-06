@@ -13,7 +13,7 @@ type ErrorDto[T any] struct {
 }
 
 func (e *ErrorDto[T]) SendErrorResponse(ctx *fiber.Ctx) error {
-	return ctx.JSON(e)
+	return ctx.Status(e.Status).JSON(e)
 }
 
 func NewErrorDto[T any](message string, status int, data T) *ErrorDto[T] {

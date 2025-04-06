@@ -17,5 +17,5 @@ func NewSuccessDto[T any](message string, status int, data T) *SuccessDto[T] {
 }
 
 func (e *SuccessDto[T]) SendSuccessResponse(ctx *fiber.Ctx) error {
-	return ctx.JSON(e)
+	return ctx.Status(e.Status).JSON(e)
 }

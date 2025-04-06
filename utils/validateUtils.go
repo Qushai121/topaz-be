@@ -30,7 +30,6 @@ var (
 )
 
 func InitValidate(lang Language) {
-
 	validate = validator.New(validator.WithRequiredStructEnabled())
 	en := en.New()
 	id := id.New()
@@ -67,7 +66,6 @@ func ValidateRequestBody[T any](ctx *fiber.Ctx) (*T, *dto.ErrorDto[any]) {
 		for _, e := range errs {
 			field := e.Field()
 			field = strings.ToLower(string(field[0])) + field[1:]
-
 			errFields[field] = append(errFields[field], e.Translate(trans))
 		}
 	}
@@ -79,6 +77,30 @@ func ValidateRequestBody[T any](ctx *fiber.Ctx) (*T, *dto.ErrorDto[any]) {
 	return &body, nil
 }
 
-func Coba() {
+func ValidateQueryParams[T any](ctx *fiber.Ctx) (*T, *dto.ErrorDto[any]) {
+	var queryParams T
+	if err := ctx.QueryParser(&queryParams); err != nil {
+		log.Println(err.Error())
+		return nil, dto.BadRequestError()
+	}
 
+	err := validate.Struct(&queryParams)
+
+	errFields := make(map[string][]string)
+
+	if err != nil {
+		errs := err.(validator.ValidationErrors)
+
+		for _, e := range errs {
+			field := e.Field()
+			field = strings.ToLower(string(field[0])) + field[1:]
+			errFields[field] = append(errFields[field], e.Translate(trans))
+		}
+	}
+
+	if len(errFields) > 0 {
+		return nil, dto.NewErrorDto("Request query params doesn`t meet the need", http.StatusUnprocessableEntity, any(&errFields))
+	}
+
+	return &queryParams, nil
 }

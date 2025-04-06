@@ -13,6 +13,7 @@ import (
 type IAuthController interface {
 	SignIn(ctx *fiber.Ctx) error
 	SignUp(ctx *fiber.Ctx) error
+	PostNewAccessToken(ctx *fiber.Ctx) error
 }
 
 type authController struct {
@@ -44,8 +45,24 @@ func (a *authController) SignUp(ctx *fiber.Ctx) error {
 	resService, errService := a.authService.SignUp(body)
 
 	if errService != nil {
-		return dto.InternalServerError().SendErrorResponse(ctx)
+		return errService.SendErrorResponse(ctx)
 	}
 
 	return dto.NewSuccessDto("Successfully Sign Up", http.StatusOK, resService).SendSuccessResponse(ctx)
+}
+
+func (a *authController) PostNewAccessToken(ctx *fiber.Ctx) error {
+	body, err := utils.ValidateRequestBody[authdto.PostNewAccessTokenRequestBodyDto](ctx)
+
+	if err != nil {
+		return err.SendErrorResponse(ctx)
+	}
+
+	resService, errService := a.authService.PostNewAccessToken(body)
+
+	if errService != nil {
+		return errService.SendErrorResponse(ctx)
+	}
+
+	return resService.SendSuccessResponse(ctx)
 }

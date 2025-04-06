@@ -37,7 +37,7 @@ func initAll() {
 	utils.InitValidate(utils.ID)
 	configs.InitDBTopaz()
 
-	// configs.InitDBTopaz.AutoMigrate(
+	// configs.DBTOPAZ.AutoMigrate(
 	// 	&models.User{},
 	// 	&models.Notification{},
 	// 	&models.News{},

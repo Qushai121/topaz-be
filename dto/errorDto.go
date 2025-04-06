@@ -39,3 +39,11 @@ func UnathorizedActionError() *ErrorDto[any] {
 		nil,
 	)
 }
+
+func BadRequestError() *ErrorDto[any] {
+	return NewErrorDto[any](
+		"Bad Request Error",
+		http.StatusBadRequest,
+		nil,
+	)
+}

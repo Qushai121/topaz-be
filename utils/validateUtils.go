@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"log"
 	"net/http"
 	"strings"
 
@@ -52,7 +53,8 @@ func InitValidate(lang Language) {
 func ValidateRequestBody[T any](ctx *fiber.Ctx) (*T, *dto.ErrorDto[any]) {
 	var body T
 	if err := ctx.BodyParser(&body); err != nil {
-		return nil, dto.InternalServerError()
+		log.Println(err.Error())
+		return nil, dto.BadRequestError()
 	}
 
 	err := validate.Struct(&body)

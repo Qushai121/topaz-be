@@ -27,9 +27,13 @@ func (s *documentService) GetDocumentList(queryParams *documentdto.GetDocumentLi
 
 	var documentList dto.PaginateDto[[]documentdto.DocumentListItem]
 
-	res := s.dbTopaz.Model(&models.Document{}).Find(&documentList.Data)
+	query := s.dbTopaz.Model(&models.Document{})
 
-	if res.Error != nil {
+	query = queryParams.GetQueryParamsToDbQuery(query, &documentList.TotalRecord)
+
+	query.Find(&documentList.Data)
+
+	if query.Error != nil {
 		return nil, dto.NewErrorDto[any]("Get document list failed", int(http.StatusInternalServerError), nil)
 	}
 

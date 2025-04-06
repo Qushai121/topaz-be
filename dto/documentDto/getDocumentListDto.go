@@ -7,6 +7,7 @@ type GetDocumentListQueryParamsDto struct {
 }
 
 type DocumentListItem struct {
+	ID         uint   `query:"id"`
 	Name       string `query:"name"`
 	ContentRaw string `query:"contentRaw"`
 }

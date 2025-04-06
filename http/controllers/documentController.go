@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"fmt"
-
 	documentdto "github.com/Qushai121/topaz-be/dto/documentDto"
 	"github.com/Qushai121/topaz-be/services"
 	"github.com/Qushai121/topaz-be/utils"
@@ -11,6 +9,7 @@ import (
 
 type IDocumentController interface {
 	GetDocumentList(ctx *fiber.Ctx) error
+	CreateDocument(ctx *fiber.Ctx) error
 }
 
 type documentController struct {
@@ -26,7 +25,6 @@ func NewDocumentController(documentServices services.IDocumentService) IDocument
 func (d *documentController) GetDocumentList(ctx *fiber.Ctx) error {
 	query, err := utils.ValidateQueryParams[documentdto.GetDocumentListQueryParamsDto](ctx)
 
-	fmt.Println(query.Page)
 	if err != nil {
 		return err.SendErrorResponse(ctx)
 	}
@@ -38,4 +36,9 @@ func (d *documentController) GetDocumentList(ctx *fiber.Ctx) error {
 	}
 
 	return resService.SendSuccessResponse(ctx)
+}
+
+
+func (d *documentController) CreateDocument(ctx *fiber.Ctx) error {
+	panic("unimplemented")
 }

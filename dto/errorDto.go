@@ -8,8 +8,8 @@ import (
 
 type ErrorDto[T any] struct {
 	Message string `json:"message"`
-	Status  int `json:"status"`
- 	Data    T `json:"data"`
+	Status  int    `json:"status"`
+	Data    T      `json:"data,omitempty"`
 }
 
 func (e *ErrorDto[T]) SendErrorResponse(ctx *fiber.Ctx) error {

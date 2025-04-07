@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Qushai121/topaz-be/configs"
 	"github.com/Qushai121/topaz-be/dto"
 	authdto "github.com/Qushai121/topaz-be/dto/authDto"
 	"github.com/Qushai121/topaz-be/entities"
@@ -22,19 +23,19 @@ type IAuthService interface {
 }
 
 type authService struct {
-	dbTopaz *gorm.DB
+	topazDb *gorm.DB
 }
 
-func NewAuthService(dbTopaz *gorm.DB) IAuthService {
+func NewAuthService(baseDb configs.BASEDB) IAuthService {
 	return &authService{
-		dbTopaz: dbTopaz,
+		topazDb: baseDb.TOPAZDB,
 	}
 }
 
 func (a *authService) SignIn(requestBody *authdto.SignInRequestBodyDto) (*dto.SuccessDto[*authdto.SignInResponseBodyDto], *dto.ErrorDto[any]) {
 	user := models.User{}
 
-	res := a.dbTopaz.Where(models.User{Email: requestBody.Email}).First(&user)
+	res := a.topazDb.Where(models.User{Email: requestBody.Email}).First(&user)
 
 	if res.Error != nil {
 		return nil, dto.NewErrorDto[any]("User not found", http.StatusNotFound, nil)
@@ -46,7 +47,7 @@ func (a *authService) SignIn(requestBody *authdto.SignInRequestBodyDto) (*dto.Su
 		return nil, dto.InternalServerError()
 	}
 
-	payload := entities.UserToken{
+	payload := entities.UserTokenPayload{
 		UserId: user.ID,
 	}
 
@@ -88,7 +89,7 @@ func (a *authService) SignUp(requestBody *authdto.SignUpRequestBodyDto) (*dto.Su
 		Email:    requestBody.Email,
 	}
 
-	res := a.dbTopaz.FirstOrCreate(&user, models.User{
+	res := a.topazDb.FirstOrCreate(&user, models.User{
 		Email: requestBody.Email,
 	})
 
@@ -105,7 +106,7 @@ func (a *authService) SignUp(requestBody *authdto.SignUpRequestBodyDto) (*dto.Su
 
 // Service To get new access token using refresh token from request body
 func (a *authService) PostNewAccessToken(requestBody *authdto.PostNewAccessTokenRequestBodyDto) (*dto.SuccessDto[*authdto.PostNewAccessTokenResponseBodyDto], *dto.ErrorDto[any]) {
-	encodeRefreshToken, errEncodeRefreshToken := utils.EncodeToken[entities.UserToken](requestBody.RefreshToken, utils.RefreshTokenKey)
+	encodeRefreshToken, errEncodeRefreshToken := utils.EncodeToken[entities.UserTokenPayload](requestBody.RefreshToken, utils.RefreshTokenKey)
 
 	if errEncodeRefreshToken != nil {
 		return nil, errEncodeRefreshToken

@@ -4,6 +4,8 @@ import "gorm.io/gorm"
 
 type Document struct {
 	gorm.Model
+	UserId             uint `gorm:"index;notNull"`
+	User               User
 	CategoryDocumentId uint `gorm:"index"`
 	CategoryDocument   CategoryDocument
 	ContentDocument    []ContentDocument

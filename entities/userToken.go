@@ -1,5 +1,5 @@
 package entities
 
-type UserToken struct {
+type UserTokenPayload struct {
 	UserId uint
 }

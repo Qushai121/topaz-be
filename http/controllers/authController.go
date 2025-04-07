@@ -1,9 +1,6 @@
 package controllers
 
 import (
-	"net/http"
-
-	"github.com/Qushai121/topaz-be/dto"
 	authdto "github.com/Qushai121/topaz-be/dto/authDto"
 	"github.com/Qushai121/topaz-be/services"
 	"github.com/Qushai121/topaz-be/utils"
@@ -32,7 +29,13 @@ func (a *authController) SignIn(ctx *fiber.Ctx) error {
 		return err.SendErrorResponse(ctx)
 	}
 
-	return dto.NewSuccessDto("Successfully Sign In", http.StatusOK, body).SendSuccessResponse(ctx)
+	resService, errService := a.authService.SignIn(body)
+
+	if errService != nil {
+		return errService.SendErrorResponse(ctx)
+	}
+
+	return resService.SendSuccessResponse(ctx)
 }
 
 func (a *authController) SignUp(ctx *fiber.Ctx) error {
@@ -48,7 +51,7 @@ func (a *authController) SignUp(ctx *fiber.Ctx) error {
 		return errService.SendErrorResponse(ctx)
 	}
 
-	return dto.NewSuccessDto("Successfully Sign Up", http.StatusOK, resService).SendSuccessResponse(ctx)
+	return resService.SendSuccessResponse(ctx)
 }
 
 func (a *authController) PostNewAccessToken(ctx *fiber.Ctx) error {

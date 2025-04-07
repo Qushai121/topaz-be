@@ -23,8 +23,8 @@ func main() {
 	routes := routes.NewRoute(app)
 
 	// Document Route Controller Inject Document Service
-	routes.DocumentRoute(controllers.NewDocumentController(services.NewDocumentService(configs.DBTOPAZ)))
-	routes.AuthRoute(controllers.NewAuthController(services.NewAuthService(configs.DBTOPAZ)))
+	routes.DocumentRoute(controllers.NewDocumentController(services.NewDocumentService(configs.DB)))
+	routes.AuthRoute(controllers.NewAuthController(services.NewAuthService(configs.DB)))
 	app.Listen(":3000")
 }
 
@@ -37,7 +37,7 @@ func initAll() {
 	utils.InitValidate(utils.ID)
 	configs.InitDBTopaz()
 
-	// configs.DBTOPAZ.AutoMigrate(
+	// configs.DB.TOPAZDB.AutoMigrate(
 	// 	&models.User{},
 	// 	&models.Notification{},
 	// 	&models.News{},

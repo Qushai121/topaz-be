@@ -56,19 +56,7 @@ func ValidateRequestBody[T any](ctx *fiber.Ctx) (*T, *dto.ErrorDto[any]) {
 		return nil, dto.BadRequestError()
 	}
 
-	err := validate.Struct(&body)
-
-	errFields := make(map[string][]string)
-
-	if err != nil {
-		errs := err.(validator.ValidationErrors)
-
-		for _, e := range errs {
-			field := e.Field()
-			field = strings.ToLower(string(field[0])) + field[1:]
-			errFields[field] = append(errFields[field], e.Translate(trans))
-		}
-	}
+	errFields := validateStruct(body)
 
 	if len(errFields) > 0 {
 		return nil, dto.NewErrorDto("Request body doesn`t meet the need", http.StatusUnprocessableEntity, any(&errFields))
@@ -84,7 +72,35 @@ func ValidateQueryParams[T any](ctx *fiber.Ctx) (*T, *dto.ErrorDto[any]) {
 		return nil, dto.BadRequestError()
 	}
 
-	err := validate.Struct(&queryParams)
+	errFields := validateStruct(queryParams)
+
+	if len(errFields) > 0 {
+		return nil, dto.NewErrorDto("Request query params doesn`t meet the need", http.StatusUnprocessableEntity, any(&errFields))
+	}
+
+	return &queryParams, nil
+}
+
+func ValidateParams[T any](ctx *fiber.Ctx) (*T, *dto.ErrorDto[any]) {
+	var params T
+	if err := ctx.ParamsParser(&params); err != nil {
+		log.Println(err.Error())
+		return nil, dto.BadRequestError()
+	}
+
+	errFields := validateStruct(params)
+
+	if len(errFields) > 0 {
+		return nil, dto.NewErrorDto("params doesn`t meet the need", http.StatusUnprocessableEntity, any(&errFields))
+	}
+
+	return &params, nil
+
+}
+
+func validateStruct[T any](data T) map[string][]string {
+
+	err := validate.Struct(&data)
 
 	errFields := make(map[string][]string)
 
@@ -98,9 +114,5 @@ func ValidateQueryParams[T any](ctx *fiber.Ctx) (*T, *dto.ErrorDto[any]) {
 		}
 	}
 
-	if len(errFields) > 0 {
-		return nil, dto.NewErrorDto("Request query params doesn`t meet the need", http.StatusUnprocessableEntity, any(&errFields))
-	}
-
-	return &queryParams, nil
+	return errFields
 }

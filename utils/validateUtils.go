@@ -12,6 +12,7 @@ import (
 	id_translations "github.com/go-playground/validator/v10/translations/id"
 
 	"github.com/Qushai121/topaz-be/dto"
+	"github.com/Qushai121/topaz-be/entities"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
@@ -49,6 +50,7 @@ func InitValidate(lang Language) {
 	}
 }
 
+// Validating and getting return Request body using go validator
 func ValidateRequestBody[T any](ctx *fiber.Ctx) (*T, *dto.ErrorDto[any]) {
 	var body T
 	if err := ctx.BodyParser(&body); err != nil {
@@ -56,7 +58,7 @@ func ValidateRequestBody[T any](ctx *fiber.Ctx) (*T, *dto.ErrorDto[any]) {
 		return nil, dto.BadRequestError()
 	}
 
-	errFields := validateStruct(body)
+	errFields := ValidateStruct(body)
 
 	if len(errFields) > 0 {
 		return nil, dto.NewErrorDto("Request body doesn`t meet the need", http.StatusUnprocessableEntity, any(&errFields))
@@ -65,6 +67,7 @@ func ValidateRequestBody[T any](ctx *fiber.Ctx) (*T, *dto.ErrorDto[any]) {
 	return &body, nil
 }
 
+// Validating and getting return query params using go validator
 func ValidateQueryParams[T any](ctx *fiber.Ctx) (*T, *dto.ErrorDto[any]) {
 	var queryParams T
 	if err := ctx.QueryParser(&queryParams); err != nil {
@@ -72,7 +75,7 @@ func ValidateQueryParams[T any](ctx *fiber.Ctx) (*T, *dto.ErrorDto[any]) {
 		return nil, dto.BadRequestError()
 	}
 
-	errFields := validateStruct(queryParams)
+	errFields := ValidateStruct(queryParams)
 
 	if len(errFields) > 0 {
 		return nil, dto.NewErrorDto("Request query params doesn`t meet the need", http.StatusUnprocessableEntity, any(&errFields))
@@ -81,6 +84,7 @@ func ValidateQueryParams[T any](ctx *fiber.Ctx) (*T, *dto.ErrorDto[any]) {
 	return &queryParams, nil
 }
 
+// Validating and getting return params / path url using go validator
 func ValidateParams[T any](ctx *fiber.Ctx) (*T, *dto.ErrorDto[any]) {
 	var params T
 	if err := ctx.ParamsParser(&params); err != nil {
@@ -88,17 +92,34 @@ func ValidateParams[T any](ctx *fiber.Ctx) (*T, *dto.ErrorDto[any]) {
 		return nil, dto.BadRequestError()
 	}
 
-	errFields := validateStruct(params)
+	errFields := ValidateStruct(params)
 
 	if len(errFields) > 0 {
 		return nil, dto.NewErrorDto("params doesn`t meet the need", http.StatusUnprocessableEntity, any(&errFields))
 	}
 
 	return &params, nil
-
 }
 
-func validateStruct[T any](data T) map[string][]string {
+// Validate and getting request body multipart
+// multipart ussualy have file upload so it mandtory to specify file fields so parse multipart can assign it to body request
+func ValidateRequestBodyMultipart[T any](ctx *fiber.Ctx, fileFields *[]entities.FileField) (*T, *dto.ErrorDto[any]) {
+	var body T
+	if err := ParseMultipartRequest(ctx, &body, fileFields); err != nil {
+		log.Println(err.Error())
+		return nil, dto.BadRequestError()
+	}
+
+	errFields := ValidateStruct(body)
+
+	if len(errFields) > 0 {
+		return nil, dto.NewErrorDto("Request body doesn`t meet the need", http.StatusUnprocessableEntity, any(&errFields))
+	}
+
+	return &body, nil
+}
+
+func ValidateStruct[T any](data T) map[string][]string {
 
 	err := validate.Struct(&data)
 

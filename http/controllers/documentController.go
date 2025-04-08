@@ -28,90 +28,83 @@ func NewDocumentController(documentServices services.IDocumentService) IDocument
 
 func (d *documentController) GetDocumentList(ctx *fiber.Ctx) error {
 	queryParams, err := utils.ValidateQueryParams[documentdto.GetDocumentListQueryParamsDto](ctx)
-
 	if err != nil {
 		return err.SendErrorResponse(ctx)
 	}
 
-	resService, err := d.documentServices.GetDocumentList(queryParams)
-
-	if err != nil {
-		return err.SendErrorResponse(ctx)
+	resService, errService := d.documentServices.GetDocumentList(queryParams)
+	if errService != nil {
+		return errService.SendErrorResponse(ctx)
 	}
-
 	return resService.SendSuccessResponse(ctx)
 }
 
 func (d *documentController) CreateDocument(ctx *fiber.Ctx) error {
-	reqBody, err := utils.ValidateRequestBody[documentdto.DocumentRequestBodyDto](ctx)
-
-	localDataUser, ok := ctx.Locals(entities.AuthorizationToken).(entities.UserTokenPayload)
-
-	if !ok {
-		return dto.BadRequestError().SendErrorResponse(ctx)
+	reqBody, errReqBody := utils.ValidateRequestBodyMultipart[documentdto.DocumentRequestBodyDto](
+		ctx,
+		&[]entities.FileField{
+			{
+				Field:      "image",
+				IsMultiple: false,
+			},
+		},
+	)
+	if errReqBody != nil {
+		return errReqBody.SendErrorResponse(ctx)
 	}
 
-	reqBody.UserId = localDataUser.UserId
-
-	if err != nil {
-		return err.SendErrorResponse(ctx)
+	localDataUser, errLocalDataUser := utils.GetAuthorizationTokenFromLocals(ctx)
+	if errLocalDataUser != nil {
+		return errLocalDataUser.SendErrorResponse(ctx)
 	}
 
-	resService, err := d.documentServices.CreateDocument(reqBody)
-
-	if err != nil {
-		return err.SendErrorResponse(ctx)
+	resService, errService := d.documentServices.CreateDocument(ctx, reqBody, localDataUser)
+	if errService != nil {
+		return errService.SendErrorResponse(ctx)
 	}
-
 	return resService.SendSuccessResponse(ctx)
 }
 
 func (d *documentController) DeleteDocument(ctx *fiber.Ctx) error {
 	params, err := utils.ValidateParams[dto.BaseDetailParamsDto](ctx)
-
 	if err != nil {
 		return err.SendErrorResponse(ctx)
 	}
 
-	localDataUser, ok := ctx.Locals(entities.AuthorizationToken).(entities.UserTokenPayload)
-
-	if !ok {
-		return dto.BadRequestError().SendErrorResponse(ctx)
+	localDataUser, errLocalDataUser := utils.GetAuthorizationTokenFromLocals(ctx)
+	if errLocalDataUser != nil {
+		return errLocalDataUser.SendErrorResponse(ctx)
 	}
 
-	resService, err := d.documentServices.DeleteDocument(params.ID, localDataUser.UserId)
-
-	if err != nil {
-		return err.SendErrorResponse(ctx)
+	resService, errService := d.documentServices.DeleteDocument(params.ID, localDataUser.UserId)
+	if errService != nil {
+		return errService.SendErrorResponse(ctx)
 	}
-
 	return resService.SendSuccessResponse(ctx)
 }
 
 func (d *documentController) UpdateDocument(ctx *fiber.Ctx) error {
-	params, err := utils.ValidateParams[dto.BaseDetailParamsDto](ctx)
+	// params, err := utils.ValidateParams[dto.BaseDetailParamsDto](ctx)
+	// if err != nil {
+	// 	return err.SendErrorResponse(ctx)
+	// }
 
-	if err != nil {
-		return err.SendErrorResponse(ctx)
-	}
+	// reqBody, errReqBody := utils.ValidateRequestBody[documentdto.DocumentRequestBodyDto](ctx)
+	// if errReqBody != nil {
+	// 	return errReqBody.SendErrorResponse(ctx)
+	// }
 
-	reqBody, errReqBody := utils.ValidateRequestBody[documentdto.DocumentRequestBodyDto](ctx)
+	// localDataUser, errLocalDataUser := utils.GetAuthorizationTokenFromLocals(ctx)
+	// if errLocalDataUser != nil {
+	// 	return errLocalDataUser.SendErrorResponse(ctx)
+	// }
 
-	if errReqBody != nil {
-		return err.SendErrorResponse(ctx)
-	}
+	// reqBody.UserId = localDataUser.UserId
 
-	localDataUser, ok := ctx.Locals(entities.AuthorizationToken).(entities.UserTokenPayload)
-
-	if !ok {
-		return dto.BadRequestError().SendErrorResponse(ctx)
-	}
-
-	resService, err := d.documentServices.UpdateDocument(params.ID, localDataUser.UserId, reqBody)
-
-	if err != nil {
-		return err.SendErrorResponse(ctx)
-	}
-
-	return resService.SendSuccessResponse(ctx)
+	// resService, errService := d.documentServices.UpdateDocument(params.ID, localDataUser.UserId, reqBody)
+	// if errService != nil {
+	// 	return errService.SendErrorResponse(ctx)
+	// }
+	// return resService.SendSuccessResponse(ctx)
+	return nil
 }

@@ -40,8 +40,8 @@ func (d *BaseListQueryParamsDto) GetSortByWithDefaultId(sortBy *string) string {
 }
 
 // Turn Query params url to query for gorm
-// This usualy use to query implement paginate
-func (d *BaseListQueryParamsDto) GetQueryParamsToDbQuery(query *gorm.DB, totalRecord *int64) *gorm.DB {
+// This usualy use to easy implement paginate
+func (d *BaseListQueryParamsDto) GetBaseQueryParamsToDbQuery(query *gorm.DB, totalRecord *int64) *gorm.DB {
 	query = query.Order(clause.OrderByColumn{
 		Column: clause.Column{
 			Name: d.GetSortByWithDefaultId(d.SortBy),
